@@ -1,3 +1,4 @@
+import { authApi } from "@/api";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,8 +18,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useAuthStore } from "@/store/useAuthStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -27,23 +30,35 @@ const FormSchema = z.object({
     message: "Username must be at least 2 characters.",
   }),
   email: z.string().email({ message: "Invalid email address." }),
-  userId: z.string(),
+  userId: z.number().min(0),
   contactNo: z.string(),
   designation: z.string(),
   company: z.string(),
   companyAddress: z.string(),
 });
+
 export default function EditProfilePage() {
+  const navigate = useNavigate();
+
+  const auth = useAuthStore((state) => state.auth);
+  const updateAuth = useAuthStore((state) => state.update);
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
-    defaultValues: {
-      // access: [],
-    },
+    defaultValues: { ...auth?.user },
   });
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
-    console.log(data);
-    toast("You submitted the following values:");
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
+    const res = await authApi.update({ ...data });
+    if (res && res.success === true && auth) {
+      const updateData: IAuth = {
+        ...auth,
+        user: { ...auth.user, ...data },
+      };
+      updateAuth(updateData);
+      toast.success(res.message);
+      navigate(`/dashboard/profile`);
+    }
   }
   return (
     <Card className="rounded-none border-0 shadow-xs mt-3">
@@ -82,7 +97,7 @@ export default function EditProfilePage() {
                   <FormItem>
                     <FormLabel>User Id*</FormLabel>
                     <FormControl>
-                      <Input placeholder="ID here" {...field} />
+                      <Input placeholder="ID here" type="number" min={0} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -171,7 +186,11 @@ export default function EditProfilePage() {
                 )}
               />
             </div>
-            <Button type="submit" className="w-full">
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={form.formState.isSubmitting}
+            >
               Save Profile
             </Button>
           </form>

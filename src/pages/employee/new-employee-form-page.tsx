@@ -1,3 +1,4 @@
+import { userApi } from "@/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -19,8 +20,8 @@ import {
 } from "@/components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeftIcon, CheckIcon } from "lucide-react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 
 const FormSchema = z
@@ -29,10 +30,10 @@ const FormSchema = z
       message: "Username must be at least 2 characters.",
     }),
     email: z.string().email({ message: "Invalid email address." }),
-    userId: z.string(),
+    userId: z.number().min(0),
     contactNo: z.string(),
-    team: z.string(),
-    access: z.array(z.string()).refine((value) => value.some((item) => item), {
+    designation: z.string(),
+    roles: z.array(z.string()).refine((value) => value.some((item) => item), {
       message: "You have to select at least one item.",
     }),
     company: z.string(),
@@ -61,26 +62,30 @@ const accessList = [
 ] as const;
 
 export default function NewEmployeeFormPage() {
+  const [newUserCreated, setNewUserCreated] = useState<z.infer<typeof FormSchema> | null>(null)
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
-    defaultValues: {
-      // access: [],
-    },
   });
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
-    console.log(data);
-    toast("You submitted the following values:");
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
+    const res = await userApi.create({ ...data, fullName: data.username });
+    if (res && res.success === true) {
+      setNewUserCreated(data)
+    }
   }
 
   return (
     <>
-      <div className="">
-        <Button className="rounded shadow-xs" variant="outline">
-          <ArrowLeftIcon /> Back
-        </Button>
-      </div>
-      <Card className="rounded-none border-0 shadow-xs mt-3">
+      <Button
+        className="rounded shadow-xs"
+        variant="outline"
+        onClick={() => window.history.back()}
+      >
+        <ArrowLeftIcon /> Back
+      </Button>
+
+      {!newUserCreated && (<Card className="rounded-none border-0 shadow-xs mt-3">
         <CardHeader>
           <CardTitle>
             <span className="text-xl font-light">Add User</span>
@@ -110,7 +115,7 @@ export default function NewEmployeeFormPage() {
                     <FormItem>
                       <FormLabel>User Id*</FormLabel>
                       <FormControl>
-                        <Input placeholder="ID here" {...field} />
+                        <Input placeholder="ID here" type="number" min={0} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -170,7 +175,7 @@ export default function NewEmployeeFormPage() {
                 />
                 <FormField
                   control={form.control}
-                  name="access"
+                  name="roles"
                   render={() => (
                     <FormItem>
                       <FormLabel>Select Access*</FormLabel>
@@ -179,7 +184,7 @@ export default function NewEmployeeFormPage() {
                           <FormField
                             key={item.id}
                             control={form.control}
-                            name="access"
+                            name="roles"
                             render={({ field }) => {
                               return (
                                 <FormItem
@@ -220,7 +225,7 @@ export default function NewEmployeeFormPage() {
                 />
                 <FormField
                   control={form.control}
-                  name="team"
+                  name="designation"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Assign Team*</FormLabel>
@@ -275,24 +280,28 @@ export default function NewEmployeeFormPage() {
                   )}
                 />
               </div>
-              <Button type="submit" className="w-full">
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={form.formState.isSubmitting}
+              >
                 Create User
               </Button>
             </form>
           </Form>
         </CardContent>
-      </Card>
+      </Card>)}
 
       <br />
 
-      <Card className="rounded-none border-0 shadow-xs mt-3">
+      {newUserCreated && (<Card className="rounded-none border-0 shadow-xs mt-3">
         <CardContent className="text-center">
           <CheckIcon className="text-green-500 w-12 h-12 mx-auto mb-3" />
           <p className="text-sm">New User Created</p>
-          <p className="text-2xl font-bold">Mr. Jhon Doe</p>
+          <p className="text-2xl font-bold">{newUserCreated.username}</p>
           <Button className="mt-3 min-w-60">View</Button>
         </CardContent>
-      </Card>
+      </Card>)}
     </>
   );
 }

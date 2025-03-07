@@ -8,17 +8,20 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { nav_links } from "@/consts";
+import { useAuthStore } from "@/store/useAuthStore";
 import { SVGProps } from "react";
 import { Link } from "react-router";
 import { JSX } from "react/jsx-runtime";
 import Logo from "../Logo";
 
 export default function Navbar() {
+  const logout = useAuthStore((state) => state.logout);
+
   return (
     <header className="w-full shadow-xs bg-background">
       <div className="container max-w-4xl mx-auto flex h-16 w-full items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-8">
-          <Link to="#">
+          <Link to="/">
             <Logo />
           </Link>
           <nav className="hidden items-center gap-4 md:flex">
@@ -31,6 +34,13 @@ export default function Navbar() {
                 {link.title}
               </Link>
             ))}
+            <Link
+              to="/dashboard/employee/new"
+              key={"employee-new" + "web"}
+              className="text-sm font-medium text-muted-foreground hover:text-foreground"
+            >
+              <Button type="button" size="sm">+ New Employee</Button>
+            </Link>
           </nav>
         </div>
         <div className="flex gap-1">
@@ -54,6 +64,9 @@ export default function Navbar() {
                   Edit Profile
                 </DropdownMenuItem>
               </Link>
+              <DropdownMenuItem className="cursor-pointer" onClick={logout}>
+                Logout
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           <Sheet>
@@ -67,7 +80,7 @@ export default function Navbar() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="sm:max-w-xs px-6 py-2.5">
-              <Link to="#">
+              <Link to="/">
                 <Logo className="text-xl" />
               </Link>
               <hr />

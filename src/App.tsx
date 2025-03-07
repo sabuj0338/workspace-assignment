@@ -4,12 +4,17 @@ import Loader from "./components/Loader";
 import { useAuthStore } from "./store/useAuthStore";
 
 const AppLayout = React.lazy(() => import("./components/layout/AppLayout"));
+const WelcomePage = React.lazy(() => import("./pages/welcome-page"));
 const LoginPage = React.lazy(() => import("./pages/auth/login-page"));
+const RegisterPage = React.lazy(() => import("./pages/auth/register-page"));
 const ForgotPasswordPage = React.lazy(
   () => import("./pages/auth/forget-password-page")
 );
 const IncomingSamplePage = React.lazy(
   () => import("./pages/dashboard/incoming-sample-page")
+);
+const DashboardPage = React.lazy(
+  () => import("./pages/dashboard/dashboard-page")
 );
 const OutgoingSamplePage = React.lazy(
   () => import("./pages/dashboard/outgoing-sample-page")
@@ -30,14 +35,13 @@ function isTokenExpired(token: string) {
 }
 
 function PrivateOutlet() {
-  return <Outlet />;
   const auth = useAuthStore((state) => state.auth);
   const logout = useAuthStore((state) => state.logout);
 
   const roles = auth?.user?.roles?.map((it) => it);
   const isAdmin = roles?.includes("admin") || roles?.includes("super-admin");
 
-  if (auth && isTokenExpired(auth.access_token)) {
+  if (auth && isTokenExpired(auth.tokens.access.token)) {
     logout();
     return <Navigate to="/login" />;
   }
@@ -46,10 +50,8 @@ function PrivateOutlet() {
     return <Outlet />;
   }
 
-  if (auth && auth.user?.email_verified_at) {
+  if (auth) {
     return <Outlet />;
-  } else if (auth && auth.user?.email_verified_at == undefined) {
-    return <Navigate to="/verify-email" />;
   } else {
     return <Navigate to="/login" />;
   }
@@ -57,10 +59,12 @@ function PrivateOutlet() {
 
 export default function App() {
   return (
-    <React.Suspense fallback={<Loader className="min-h-screen"/>}>
+    <React.Suspense fallback={<Loader className="min-h-screen" />}>
       <Routes>
-        <Route path="" element={<LoginPage />} />
+        <Route path="" element={<WelcomePage />} />
+
         <Route path="login" element={<LoginPage />} />
+        <Route path="register" element={<RegisterPage />} />
         <Route path="forgot-password" element={<ForgotPasswordPage />} />
 
         <Route
@@ -71,6 +75,7 @@ export default function App() {
             </AppLayout>
           }
         >
+          <Route path="" element={<DashboardPage />} />
           <Route path="incoming-sample" element={<IncomingSamplePage />} />
           <Route path="outgoing-sample" element={<OutgoingSamplePage />} />
           <Route path="teams" element={<TeamsPage />} />

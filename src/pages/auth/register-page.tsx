@@ -8,13 +8,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -28,15 +26,26 @@ import { z } from "zod";
 
 const ACCESS_TOKEN_KEY = import.meta.env.VITE_ACCESS_TOKEN_KEY;
 
-const FormSchema = z.object({
-  email: z.string().email({ message: "Invalid email address." }),
-  password: z.string().min(6, {
-    message: "Password must be at least 6 characters.",
-  }),
-  rememberMe: z.boolean().optional().default(false),
-});
+const FormSchema = z
+  .object({
+    fullName: z.string(),
+    username: z.string().min(6, {
+      message: "Username must be at least 6 characters.",
+    }),
+    email: z.string().email({ message: "Invalid email address." }),
+    password: z.string().min(6, {
+      message: "Password must be at least 6 characters.",
+    }),
+    confirmPassword: z.string().min(6, {
+      message: "Password must be at least 6 characters.",
+    }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const navigate = useNavigate();
 
   const auth = useAuthStore((state) => state.auth);
@@ -47,7 +56,7 @@ export default function LoginPage() {
   });
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
-    const output = await authApi.login({ ...data });
+    const output = await authApi.register({ ...data });
     if (output) {
       updateAuth(output);
       localStorage.setItem(ACCESS_TOKEN_KEY, output.tokens.access.token);
@@ -70,7 +79,7 @@ export default function LoginPage() {
                   <Logo className="text-3xl" />
                 </CardTitle>
                 <CardDescription className="text-center mx-auto mt-3 text-base">
-                  Sign in to start your session
+                  Sign up to start your session
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -80,6 +89,34 @@ export default function LoginPage() {
                     className="space-y-6"
                   >
                     <div className="flex flex-col gap-6">
+                      <FormField
+                        control={form.control}
+                        name="username"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input placeholder="Username" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="fullName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                placeholder="Full Name"
+                                className="w-full rounded bg-background pr-8"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                       <FormField
                         control={form.control}
                         name="email"
@@ -123,51 +160,33 @@ export default function LoginPage() {
                         )}
                       />
 
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                          <FormField
-                            control={form.control}
-                            name="rememberMe"
-                            render={({ field }) => (
-                              <FormItem className="flex items-center space-x-2">
-                                <FormControl>
-                                  <Checkbox
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                    className="rounded-none w-5 h-5"
-                                  />
-                                </FormControl>
-                                <FormLabel
-                                  htmlFor="rememberMe"
-                                  className="text-gray-500"
-                                >
-                                  Remember Me
-                                </FormLabel>
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                        <Button
-                          type="submit"
-                          className="rounded px-6"
-                          disabled={form.formState.isSubmitting}
-                        >
-                          Sign In
-                        </Button>
-                      </div>
+                      <FormField
+                        control={form.control}
+                        name="confirmPassword"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input placeholder="Confirm Password" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <Button
+                        type="submit"
+                        className="rounded px-6"
+                        disabled={form.formState.isSubmitting}
+                      >
+                        Sign Up
+                      </Button>
 
                       <div className="flex items-center justify-between">
-                        <Link
-                          to="/forgot-password"
-                          className="inline-block text-sm underline-offset-4 underline"
-                        >
-                          I forgot my password
-                        </Link>
                         <Link
                           to="/register"
                           className="inline-block text-sm underline-offset-4 underline"
                         >
-                          Create a new account?
+                          Already have an account?
                         </Link>
                       </div>
                     </div>

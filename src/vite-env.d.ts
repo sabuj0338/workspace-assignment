@@ -2,23 +2,45 @@
 
 type IAuth = {
   user: IUser
-  access_token: string
-  refresh_token: string
+  // access_token: string
+  // refresh_token: string
+  tokens: {
+    access: {
+      token: string
+      expires: string
+    }
+    refresh: {
+      token: string
+      expires: string
+    }
+  }
 }
 
 type IUser = {
   id: string
-  name: string
+  userId: number
+  fullName: string
+  username: string
   email: string
   avatar?: string
-  phone?: string
-  subscription_activated_at?: string
-  last_login_at?: string
-  email_verified_at?: string
-  created_by?: string
-  referral_user?: IUser
+  contactNo?: string
+  designation?: string
+  company?: string
+  companyAddress?: string
   roles?: Array<string>
-  status: number
-  created_at: string
-  updated_at: string
+  createdAt: string
+  updatedAt: string
+}
+
+type ApiResponse = {
+  success: boolean
+  message: string
+  data: unknown
+}
+
+type Team = {
+  id: string;
+  count: number;
+  description: string;
+  name: string;
 }
