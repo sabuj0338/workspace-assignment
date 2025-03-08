@@ -3,6 +3,7 @@ import { BellRing, SearchIcon, TruckIcon, XIcon } from "lucide-react";
 
 import { teamApi } from "@/api";
 import DataTable from "@/components/DataTable";
+import ExportCSV from "@/components/ExportCSV";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import Loader from "@/components/Loader";
 import ReportCard from "@/components/ReportCard";
@@ -18,7 +19,7 @@ type FilterOptionsType = {
 
 const columns: ColumnDef<Team>[] = [
   {
-    id: "select",
+    id: "select-col",
     header: ({ table }) => (
       <Checkbox
         checked={
@@ -26,14 +27,12 @@ const columns: ColumnDef<Team>[] = [
           (table.getIsSomePageRowsSelected() && "indeterminate")
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
       />
     ),
     cell: ({ row }) => (
       <Checkbox
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
       />
     ),
     enableSorting: false,
@@ -63,13 +62,23 @@ const columns: ColumnDef<Team>[] = [
 ];
 
 export default function TeamsPage() {
+  const [loading, setLoading] = useState(false);
+
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<FilterOptionsType | undefined>();
   const [options, setOptions] = useState<string>();
 
-  const { data, isLoading } = useQuery({
+  const [rowSelection, setRowSelection] = useState({});
+
+  const query = useQuery({
     queryKey: ["teams", page, 10, options],
     queryFn: () => teamApi.all(page, 10, options),
+    refetchOnWindowFocus: false,
+  });
+
+  const reportsQuery = useQuery({
+    queryKey: ["teams-reports"],
+    queryFn: () => teamApi.getReports(),
     refetchOnWindowFocus: false,
   });
 
@@ -86,6 +95,13 @@ export default function TeamsPage() {
     setOptions(undefined);
   };
 
+  async function mock() {
+    setLoading(true);
+    await teamApi.mock();
+    setLoading(false);
+    query.refetch();
+  }
+
   return (
     <DashboardLayout>
       <div className="w-full">
@@ -94,25 +110,25 @@ export default function TeamsPage() {
             icon={<BellRing />}
             iconColor="bg-yellow-500/25 text-yellow-500"
             title="Total Teams"
-            value="24"
+            value={reportsQuery.data?.total ?? 0}
           />
           <ReportCard
             icon={<BellRing />}
             iconColor="bg-violet-500/25 text-violet-500"
             title="Total User"
-            value="16"
+            value={reportsQuery.data?.totalUsers ?? 0}
           />
           <ReportCard
             icon={<BellRing />}
             iconColor="bg-pink-500/25 text-pink-500"
             title="Total Incoming"
-            value="8"
+            value={'0'}
           />
           <ReportCard
             icon={<TruckIcon />}
             iconColor="bg-cyan-500/25 text-cyan-500"
             title="Outgoing Pending"
-            value="8"
+            value={'0'}
           />
         </div>
         <div className="my-4 flex w-full items-center justify-end space-x-2">
@@ -126,13 +142,43 @@ export default function TeamsPage() {
           <Button type="button" onClick={handleSearch}>
             <SearchIcon />
           </Button>
-          <Button type="button" onClick={handleReset} variant="destructive" disabled={options === undefined}>
+          <Button
+            type="button"
+            onClick={handleReset}
+            variant="destructive"
+            disabled={options === undefined}
+          >
             <XIcon />
+          </Button>
+          <ExportCSV
+            data={
+              query.data?.data?.results?.filter((item: Team) =>
+                Object.keys(rowSelection).includes(item.id)
+              ) ?? []
+            }
+            fileName="teams.csv"
+          />
+          <Button
+            type="button"
+            disabled={loading || query.data?.data?.results?.length !== 0}
+            onClick={mock}
+          >
+            Mock Data
           </Button>
         </div>
         <div className="rounded-md border">
-          {isLoading && <Loader />}
-          <DataTable columns={columns} data={data?.data?.results ?? []} />
+          {query.isLoading && <Loader />}
+          <DataTable
+            columns={columns}
+            data={query.data?.data?.results ?? []}
+            rowSelection={rowSelection}
+            onRowSelectionChange={setRowSelection}
+            pagination={{
+              currentPage: page,
+              onPageChange: (page) => setPage(page),
+              totalPages: query.data?.data?.totalPages ?? 0,
+            }}
+          />
         </div>
       </div>
     </DashboardLayout>

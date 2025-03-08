@@ -9,11 +9,11 @@ import {
   PaginationPrevious,
 } from "./ui/pagination";
 
-type PaginatorProps = {
+export type PaginatorProps = {
   currentPage: number;
   totalPages: number;
   onPageChange: (pageNumber: number) => void;
-  showPreviousNext: boolean;
+  showPreviousNext?: boolean;
 };
 
 const generatePaginationLinks = (
@@ -57,7 +57,7 @@ const generatePaginationLinks = (
 
     // Add ellipsis if needed
     if (currentPage > 3) {
-        pages.push(<PaginationEllipsis key="ellipsis-start"/>)
+      pages.push(<PaginationEllipsis key="ellipsis-start" />);
     }
 
     // Add middle page if needed
@@ -73,12 +73,11 @@ const generatePaginationLinks = (
         </PaginationItem>
       );
     }
-    
-     // Add ellipsis if needed
-    if (currentPage < totalPages-2 ) {
-       pages.push(<PaginationEllipsis key="ellipsis-end"/>)
+
+    // Add ellipsis if needed
+    if (currentPage < totalPages - 2) {
+      pages.push(<PaginationEllipsis key="ellipsis-end" />);
     }
-   
 
     // Add end pages
     endPages.forEach((page) => {
@@ -102,22 +101,22 @@ export default function Paginator({
   currentPage,
   totalPages,
   onPageChange,
-  showPreviousNext,
+  showPreviousNext = true,
 }: PaginatorProps) {
   const handlePreviousClick = () => {
-    if(currentPage > 1){
-        onPageChange(currentPage - 1)
+    if (currentPage > 1) {
+      onPageChange(currentPage - 1);
     }
-  }
+  };
   const handleNextClick = () => {
-     if(currentPage < totalPages){
-        onPageChange(currentPage + 1)
+    if (currentPage < totalPages) {
+      onPageChange(currentPage + 1);
     }
-  }
+  };
   return (
     <Pagination>
       <PaginationContent>
-        {showPreviousNext && totalPages > 0 ? (
+        {showPreviousNext && totalPages > 0 && currentPage > 1 ? (
           <PaginationItem>
             <PaginationPrevious
               onClick={handlePreviousClick}
@@ -126,7 +125,7 @@ export default function Paginator({
           </PaginationItem>
         ) : null}
         {generatePaginationLinks(currentPage, totalPages, onPageChange)}
-        {showPreviousNext && totalPages > 0 ? (
+        {showPreviousNext && totalPages > 0 && currentPage < totalPages ? (
           <PaginationItem>
             <PaginationNext
               onClick={handleNextClick}

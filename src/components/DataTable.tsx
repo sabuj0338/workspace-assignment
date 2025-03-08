@@ -7,6 +7,8 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  OnChangeFn,
+  RowSelectionState,
   useReactTable,
 } from "@tanstack/react-table";
 
@@ -18,41 +20,36 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useState } from "react";
-import Paginator from "./Paginator";
+import Paginator, { PaginatorProps } from "./Paginator";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  rowSelection?: RowSelectionState;
+  onRowSelectionChange?: OnChangeFn<RowSelectionState>;
+  pagination?: PaginatorProps;
 }
 
 export default function DataTable<TData, TValue>({
   columns,
   data,
-}: DataTableProps<TData, TValue>) {
-  // const [selectedRows, setSelectedRows] = useState<TData[]>([]);
-  const [rowSelection, setRowSelection] = useState({});
-
+  rowSelection,
+  onRowSelectionChange,
+  pagination,
+}: DataTableProps<TData extends { id: string } ? TData : never, TValue>) {
   const table = useReactTable({
     data: data || [],
     columns,
+    getRowId: (row) => row.id,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    onRowSelectionChange: setRowSelection,
+    onRowSelectionChange: onRowSelectionChange,
     state: {
       rowSelection,
     },
   });
-
-  // useEffect(() => {
-  //   setSelectedRows(
-  //     table.getSelectedRowModel().rows.map((row) => row.original)
-  //   );
-  // }, [rowSelection, table]);
-
-  // console.log(11, selectedRows, rowSelection);
 
   return (
     <div className="">
@@ -104,14 +101,11 @@ export default function DataTable<TData, TValue>({
           {table.getFilteredSelectedRowModel().rows.length} of{" "}
           {table.getFilteredRowModel().rows.length} row(s) selected.
         </div>
-        <div className="space-x-2">
-          <Paginator
-            currentPage={1}
-            totalPages={50}
-            showPreviousNext
-            onPageChange={() => {}}
-          />
-        </div>
+        {pagination && (
+          <div className="space-x-2">
+            <Paginator {...pagination} />
+          </div>
+        )}
       </div>
     </div>
   );
