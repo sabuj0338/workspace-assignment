@@ -1,55 +1,110 @@
-# React + TypeScript + Vite
+# Vite React Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Introduction
+This guide provides instructions to set up and run a Vite-based React application.
 
-Currently, two official plugins are available:
+## Prerequisites
+Ensure you have the following installed on your system:
+- [Node.js](https://nodejs.org/) (v16 or later recommended)
+- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Installation
 
-## Expanding the ESLint configuration
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/your-repo/vite-react-app.git
+   cd vite-react-app
+   ```
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+2. Install dependencies:
+   ```sh
+   npm install
+   ```
+   or using Yarn:
+   ```sh
+   yarn install
+   ```
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+## Running the Application
+
+### Development Mode
+To start the application in development mode, run:
+```sh
+npm run dev
+```
+or using Yarn:
+```sh
+yarn dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+The application will be available at: [http://localhost:5173](http://localhost:5173)
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+### Build for Production
+To build the application for production, run:
+```sh
+npm run build
 ```
-# workspace-assignment
+or using Yarn:
+```sh
+yarn build
+```
+
+### Preview Production Build
+To preview the production build locally, run:
+```sh
+npm run preview
+```
+or using Yarn:
+```sh
+yarn preview
+```
+
+## Project Structure
+```
+.vite-react-app/
+├── public/          # Static assets
+├── src/             # Source files
+│   ├── api/         # API endpoints
+│   ├── assets/      # Reusable components
+│   ├── components/  # Reusable components
+│   ├── lib/         # Reusable functions
+│   ├── pages/       # Page components
+│   ├── stores/      # State management
+│   ├── main.tsx     # Entry point
+│   ├── App.tsx      # Root component
+│   ├── consts       # constant variables
+├── .gitignore       # Git ignore file
+├── index.html       # Main HTML file
+├── package.json     # Project metadata and dependencies
+├── vite.config.ts   # Vite configuration
+```
+
+## Environment Variables
+Create a `.env` file in the project root and configure it as needed:
+```env
+VITE_API_URL=http://localhost:4000
+VITE_APP_NAME=Vite React App
+```
+
+## Linting and Formatting
+To lint and fix issues:
+```sh
+npm run lint
+```
+or using Yarn:
+```sh
+yarn lint
+```
+
+To format code:
+```sh
+npm run format
+```
+or using Yarn:
+```sh
+yarn format
+```
+
+## License
+This project is licensed under the MIT License.
+

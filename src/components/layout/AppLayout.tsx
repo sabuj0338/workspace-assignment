@@ -1,5 +1,6 @@
 import { useAuthStore } from "@/store/useAuthStore";
 import * as React from "react";
+import { Navigate } from "react-router";
 
 const Navbar = React.lazy(() => import("./Navbar"));
 
@@ -11,9 +12,9 @@ export default function AppLayout(props: Props) {
   const { children } = props;
   const auth = useAuthStore((state) => state.auth);
 
-  // if (auth === undefined) {
-  //   return <Navigate replace to="/login" />;
-  // }
+  if (auth === undefined) {
+    return <Navigate replace to="/login" />;
+  }
 
   return (
     <>
