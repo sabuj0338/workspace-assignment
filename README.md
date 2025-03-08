@@ -12,8 +12,8 @@ Ensure you have the following installed on your system:
 
 1. Clone the repository:
    ```sh
-   git clone https://github.com/your-repo/vite-react-app.git
-   cd vite-react-app
+   git clone https://github.com/sabuj0338/workspace-assignment.git
+   cd workspace-assignment
    ```
 
 2. Install dependencies:
