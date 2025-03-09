@@ -30,7 +30,7 @@ const FormSchema = z
       message: "Username must be at least 2 characters.",
     }),
     email: z.string().email({ message: "Invalid email address." }),
-    userId: z.number().min(0),
+    userId: z.string().min(0),
     contactNo: z.string(),
     designation: z.string(),
     roles: z.array(z.string()).refine((value) => value.some((item) => item), {
